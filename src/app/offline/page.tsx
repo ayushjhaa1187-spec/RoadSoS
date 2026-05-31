@@ -4,46 +4,61 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStore } from "@/store/useStore";
-import { savePois, getCacheAgeMinutes } from "@/lib/offlineDb";
+import { cachePOIs } from "@/lib/db";
 import { toast } from "sonner";
 import axios from "axios";
 import { DownloadCloud, CheckCircle, Clock } from "lucide-react";
 
 export default function OfflinePage() {
-  const { location } = useStore();
+  const { emergencyLocation } = useStore();
   const [isDownloading, setIsDownloading] = useState(false);
   const [cacheAge, setCacheAge] = useState<number | null>(null);
+
+  const getCacheAgeMinutes = () => {
+    const cachedAt = localStorage.getItem('roadsos_cache_time');
+    if (!cachedAt) return null;
+    const diff = new Date().getTime() - new Date(cachedAt).getTime();
+    return Math.floor(diff / 60000);
+  };
 
   useEffect(() => {
     setCacheAge(getCacheAgeMinutes());
     
-    // Auto-cache on first load logic (if cache is null and we are online)
     const initCache = async () => {
         const age = getCacheAgeMinutes();
-        if (age === null && location.lat && navigator.onLine) {
+        if (age === null && emergencyLocation.lat && navigator.onLine) {
             handleDownloadRegion();
         }
     };
     initCache();
-  }, [location.lat]);
+  }, [emergencyLocation.lat]);
 
   const handleDownloadRegion = async () => {
-    if (!location.lat || !location.lng) {
+    if (!emergencyLocation.lat || !emergencyLocation.lng) {
       toast.error("Location required to cache region.");
       return;
     }
 
     setIsDownloading(true);
     try {
+      const minLat = emergencyLocation.lat - 0.18;
+      const maxLat = emergencyLocation.lat + 0.18;
+      const minLng = emergencyLocation.lng - 0.18;
+      const maxLng = emergencyLocation.lng + 0.18;
+
       const res = await axios.post("http://localhost:8000/api/cache-region", {
-        lat: location.lat,
-        lng: location.lng,
-        radius_km: 20
+        min_lat: minLat,
+        min_lng: minLng,
+        max_lat: maxLat,
+        max_lng: maxLng
       });
       
-      await savePois(res.data);
+      const poisToCache = res.data.pois || res.data;
+      await cachePOIs(poisToCache);
+      localStorage.setItem('roadsos_cache_time', new Date().toISOString());
+      localStorage.setItem('roadsos_precached', 'true');
       setCacheAge(0);
-      toast.success(`Cached ${res.data.length} POIs for offline use.`);
+      toast.success(`Cached ${poisToCache.length} POIs for offline use.`);
     } catch (err) {
       toast.error("Failed to download offline data.");
     } finally {
@@ -86,7 +101,7 @@ export default function OfflinePage() {
           <Button 
             className="w-full flex items-center gap-2" 
             onClick={handleDownloadRegion}
-            disabled={isDownloading || !location.lat}
+            disabled={isDownloading || !emergencyLocation.lat}
           >
             <DownloadCloud size={18} />
             {isDownloading ? "Downloading..." : "Pre-download this district"}

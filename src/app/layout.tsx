@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Navigation } from "@/components/Navigation";
 import { OfflineBanner } from "@/components/OfflineBanner";
-import { APIProvider } from "@vis.gl/react-google-maps";
+import { MapProvider } from "@/components/MapProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,14 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} min-h-screen bg-background text-foreground flex flex-col`}>
-        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
+        <MapProvider>
           <OfflineBanner />
           <main className="flex-1 pb-16">
             {children}
           </main>
           <Navigation />
           <Toaster />
-        </APIProvider>
+        </MapProvider>
       </body>
     </html>
   );

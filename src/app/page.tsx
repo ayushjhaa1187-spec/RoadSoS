@@ -8,7 +8,7 @@ import { Hospital, ShieldAlert, Ambulance, Truck, Wrench, CarFront, Phone, MapPi
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
-import { queryNearest } from "@/lib/offlineDb";
+import { queryLocalPOIs, cachePOIs } from "@/lib/db";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const API_URL = "http://localhost:8000/api";
@@ -86,7 +86,7 @@ export default function Home() {
         throw new Error("Offline");
       }
     } catch (error: any) {
-      const nearestHospitals = await queryNearest(emergencyLocation.lat, emergencyLocation.lng, "hospital", 20, 1);
+      const nearestHospitals = await queryLocalPOIs(emergencyLocation.lat, emergencyLocation.lng, "hospital", 20);
       const mapsLink = `https://www.google.com/maps?q=${emergencyLocation.lat},${emergencyLocation.lng}`;
       smsBody = nearestHospitals.length > 0 ? `Emergency! I need help at: ${mapsLink}. Nearest hospital: ${nearestHospitals[0].name}.` : `Emergency! I need help at: ${mapsLink}. Send ambulance.`;
       toast.info("Backend unreachable. Used offline cache for SOS payload.");

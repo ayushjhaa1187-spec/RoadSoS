@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: RoadSoS Backend API
+  description: API specification for the RoadSoS emergency assistance platform.
+  version: 1.0.0
+servers:
+  - url: https://api.roadsos.example.com/v1
+    description: Production server
+paths:
+  /nearest:
+    get:
+      summary: Find nearest emergency services
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+          example: 12.9716
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+          example: 77.5946
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [hospital, police, ambulance, fire_station]
+          example: hospital
+        - name: radius_km
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+            minimum: 0
+          example: 5.0
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [results]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/POI'
+  /sos:
+    post:
+      summary: Trigger SOS alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lat, lng, contacts]
+              properties:
+                lat:
+                  type: number
+                  format: float
+                  example: 12.9716
+                lng:
+                  type: number
+                  format: float
+                  example: 77.5946
+                contacts:
+                  type: array
+                  items:
+                    type: string
+                    pattern: '^\+91[0-9]{10}$'
+                  example: ["+919876543210"]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sms_body, nearest_hospital, nearest_police, nearest_ambulance]
+                properties:
+                  sms_body:
+                    type: string
+                    example: "Emergency! I need help at 12.9716, 77.5946"
+                  nearest_hospital:
+                    $ref: '#/components/schemas/POI'
+                  nearest_police:
+                    $ref: '#/components/schemas/POI'
+                  nearest_ambulance:
+                    $ref: '#/components/schemas/POI'
+  /chat:
+    post:
+      summary: Interactive emergency chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message, lat, lng, session_id]
+              properties:
+                message:
+                  type: string
+                  example: "I witnessed an accident"
+                lat:
+                  type: number
+                  format: float
+                  example: 12.9716
+                lng:
+                  type: number
+                  format: float
+                  example: 77.5946
+                session_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reply, priority, actions]
+                properties:
+                  reply:
+                    type: string
+                    example: "We have notified the nearest hospital. Please stay on the line."
+                  priority:
+                    type: string
+                    enum: [normal, high]
+                    example: "high"
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      required: [label, tel]
+                      properties:
+                        label:
+                          type: string
+                          example: "Call Hospital"
+                        tel:
+                          type: string
+                          example: "+911234567890"
+  /cache-region:
+    post:
+      summary: Fetch POIs for a specific region to cache
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [min_lat, min_lng, max_lat, max_lng]
+              properties:
+                min_lat:
+                  type: number
+                  format: float
+                  example: 12.90
+                min_lng:
+                  type: number
+                  format: float
+                  example: 77.50
+                max_lat:
+                  type: number
+                  format: float
+                  example: 13.00
+                max_lng:
+                  type: number
+                  format: float
+                  example: 77.70
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pois]
+                properties:
+                  pois:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/POI'
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, db_last_refreshed]
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  db_last_refreshed:
+                    type: string
+                    format: date-time
+                    example: "2026-05-31T09:00:00Z"
+components:
+  schemas:
+    POI:
+      type: object
+      required: [id, name, type, lat, lng, phone, address, distance_km]
+      properties:
+        id:
+          type: string
+          example: "poi_123"
+        name:
+          type: string
+          example: "St. Martha's Hospital"
+        type:
+          type: string
+          enum: [hospital, police, ambulance, fire_station]
+          example: "hospital"
+        lat:
+          type: number
+          format: float
+          example: 12.9716
+        lng:
+          type: number
+          format: float
+          example: 77.5946
+        phone:
+          type: string
+          example: "+918022275081"
+        address:
+          type: string
+          example: "Nrupathunga Rd, Bengaluru, Karnataka 560001"
+        distance_km:
+          type: number
+          format: float
+          example: 1.2

@@ -11,7 +11,7 @@ import axios from "axios";
 import { queryLocalPOIs } from "@/lib/db";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export default function Home() {
   const { emergencyLocation, isDemoMode, isLocationManuallySet, setUserLocation, setLocationError, toggleDemoMode, resetEmergencyLocation } = useStore();

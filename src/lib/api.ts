@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { queryLocalPOIs, POI } from './db';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export async function withFallback<T>(apiFunc: () => Promise<T>, fallbackFunc: () => Promise<T>): Promise<T> {
   try {

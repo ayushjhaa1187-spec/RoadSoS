@@ -72,7 +72,23 @@ def process_message(user_text: str, lat: float, lng: float, session_id: str):
     If priority is high, prepend a first-aid tip.
     """
 
-    final_reply = model.generate_content(response_prompt).text
+    try:
+        final_reply = model.generate_content(response_prompt).text
+    except Exception as e:
+        print(f"Gemini API error: {e}")
+        if intent == "find_hospital":
+            final_reply = "I found some nearby hospitals for you. Please check the map or contact them."
+        elif intent == "find_police":
+            final_reply = "I found some nearby police stations. Please check the list or contact them."
+        elif intent == "find_ambulance":
+            final_reply = "Here are the nearest ambulance services. Please contact them immediately."
+        elif intent == "emergency_sos":
+            final_reply = "Emergency detected. Please contact the nearest emergency services."
+        else:
+            final_reply = "I'm here to help. Please let me know what you need or tap the SOS button for immediate assistance."
+            
+        if pois:
+            final_reply += "\n\nNearby services:\n" + poi_list_str
 
     if priority == "high":
         tip = "FIRST AID TIP: If someone is bleeding, apply firm pressure with a clean cloth. Do not move the injured person unless in immediate danger.\n\n"

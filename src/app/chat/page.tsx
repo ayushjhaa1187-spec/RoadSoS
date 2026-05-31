@@ -15,6 +15,8 @@ interface Message {
   isPriority?: boolean;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 export default function ChatPage() {
   const { emergencyLocation, userLocation } = useStore();
   const [messages, setMessages] = useState<Message[]>([
@@ -69,7 +71,7 @@ export default function ChatPage() {
 
   const playTTS = async (text: string) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/chat/tts?text=${encodeURIComponent(text)}`, { responseType: 'blob' });
+      const res = await axios.get(`${API_URL}/chat/tts?text=${encodeURIComponent(text)}`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const audio = new Audio(url);
       audio.play();
@@ -90,7 +92,7 @@ export default function ChatPage() {
     const lng = emergencyLocation.lng || userLocation.lng;
 
     try {
-      const res = await axios.post("http://localhost:8000/api/chat", {
+      const res = await axios.post(`${API_URL}/chat`, {
         message: userMsg.text,
         lat: lat,
         lng: lng,

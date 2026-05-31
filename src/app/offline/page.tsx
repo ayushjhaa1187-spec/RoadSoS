@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import axios from "axios";
 import { DownloadCloud, CheckCircle, Clock } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 export default function OfflinePage() {
   const { emergencyLocation } = useStore();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -47,7 +49,7 @@ export default function OfflinePage() {
       const minLng = emergencyLocation.lng - 0.18;
       const maxLng = emergencyLocation.lng + 0.18;
 
-      const res = await axios.post("http://localhost:8000/api/cache-region", {
+      const res = await axios.post(`${API_URL}/cache-region`, {
         min_lat: minLat,
         min_lng: minLng,
         max_lat: maxLat,

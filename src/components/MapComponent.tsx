@@ -10,6 +10,8 @@ import { Navigation as NavigationIcon, Phone } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 export default function MapComponent({ 
     lat, 
     lng, 
@@ -32,7 +34,7 @@ export default function MapComponent({
       try {
         if (navigator.onLine) {
           const typeQuery = currentType ? `&type=${currentType}` : "";
-          const res = await axios.get(`http://localhost:8000/api/nearest?lat=${lat}&lng=${lng}&radius_km=10${typeQuery}`, { timeout: 5000 });
+          const res = await axios.get(`${API_URL}/nearest?lat=${lat}&lng=${lng}&radius_km=10${typeQuery}`, { timeout: 5000 });
           setPois(res.data);
         } else {
           throw new Error("Offline");

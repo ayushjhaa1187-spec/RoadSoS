@@ -4,8 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import math
 
 import os
-DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "emergency_data.db")
-DATABASE_PATH = os.getenv("DATABASE_PATH", DEFAULT_DB_PATH)
+DATABASE_PATH = os.getenv("DATABASE_PATH", "emergency_data.db")
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 engine = create_engine(

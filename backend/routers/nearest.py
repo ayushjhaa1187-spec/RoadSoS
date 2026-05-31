@@ -8,13 +8,10 @@ from services.geo import haversine
 from services.places_fallback import fetch_overpass_fallback
 
 router = APIRouter()
-_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-def _get_db_path():
-    return os.getenv("DATABASE_PATH", os.path.join(_BACKEND_DIR, "emergency_data.db"))
+from database import DATABASE_PATH
 
 def get_db():
-    conn = sqlite3.connect(_get_db_path())
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     try:
         yield conn

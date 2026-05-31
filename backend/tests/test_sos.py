@@ -1,31 +1,15 @@
 import pytest
 import os
+import sys
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 os.environ.setdefault("DATABASE_PATH", "./test_emergency_data.db")
 
 from main import app
-from database import Base, get_db
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_emergency_data.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_test_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = get_test_db
 client = TestClient(app)
 
 
@@ -44,10 +28,12 @@ def test_sos_payload():
     assert "sms_body" in data
     assert "https://www.google.com/maps" in data["sms_body"]
 
+
 def test_sos_missing_fields():
     payload = {"lat": 12.9716}
     response = client.post("/sos", json=payload)
     assert response.status_code == 422
+
 
 def test_sos_invalid_coords():
     payload = {
@@ -57,8 +43,8 @@ def test_sos_invalid_coords():
         "emergency_contacts": []
     }
     response = client.post("/sos", json=payload)
-    # Pydantic might catch 1000 as invalid lat
     assert response.status_code == 422
+
 
 def test_sos_empty_contacts():
     payload = {
@@ -69,6 +55,7 @@ def test_sos_empty_contacts():
     }
     response = client.post("/sos", json=payload)
     assert response.status_code == 200
+
 
 def test_sos_sms_content():
     payload = {
@@ -84,6 +71,7 @@ def test_sos_sms_content():
     assert "12.9716" in sms_body
     assert "77.5946" in sms_body
 
+
 def test_sos_hospital_presence():
     payload = {
         "lat": 12.9716,
@@ -93,5 +81,4 @@ def test_sos_hospital_presence():
     }
     response = client.post("/sos", json=payload)
     data = response.json()
-    # Even if none in DB, it should handle it (maybe null or empty dict)
     assert "nearest_hospital" in data

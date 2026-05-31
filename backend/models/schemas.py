@@ -18,11 +18,13 @@ class POIResponse(POIBase):
     id: Union[int, str]
     distance_km: float
 
+    class Config:
+        from_attributes = True
+
 
 class SOSRequest(BaseModel):
     lat: float = Field(..., ge=-90, le=90)
     lng: float = Field(..., ge=-180, le=180)
-    # Support both old (user_phone/emergency_contacts) and new (contacts) field names
     user_phone: Optional[str] = None
     emergency_contacts: Optional[List[str]] = Field(default_factory=list)
     contacts: Optional[List[str]] = Field(default_factory=list)

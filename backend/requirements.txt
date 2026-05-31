@@ -9,3 +9,4 @@ openai
 python-multipart
 pydantic-settings
 requests
+httpx

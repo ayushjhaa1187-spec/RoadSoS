@@ -43,8 +43,16 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 
+# logs
+build_log.txt
+
+# Python backend
 backend/venv/
 backend/__pycache__/
-tts_cache/
-*.db
-
+backend/**/__pycache__/
+backend/*.pyc
+backend/*.db
+backend/test_*.db
+backend/tts_cache/
+backend/.env
+backend/.pytest_cache/

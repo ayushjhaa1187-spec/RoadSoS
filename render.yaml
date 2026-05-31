@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: roadsos-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_PATH
+        value: /data/emergency_data.db
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PORT
+        value: 8080
+    disk:
+      name: roadsos-db
+      mountPath: /data
+      sizeGB: 1

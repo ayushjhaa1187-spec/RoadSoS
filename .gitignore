@@ -42,3 +42,9 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+backend/venv/
+backend/__pycache__/
+tts_cache/
+*.db
+

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+sqlite-utils
+google-generativeai
+gTTS
+overpy
+openai
+python-multipart
+pydantic-settings
+requests

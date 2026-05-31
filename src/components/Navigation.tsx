@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Map as MapIcon, MessageCircle, Settings, WifiOff } from "lucide-react";
+import { Home, Map as MapIcon, MessageCircle, WifiOff } from "lucide-react";
 
 export function Navigation() {
   const pathname = usePathname();

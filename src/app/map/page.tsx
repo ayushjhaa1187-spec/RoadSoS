@@ -2,7 +2,7 @@
 
 import { useStore } from "@/store/useStore";
 import dynamic from "next/dynamic";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 const MapComponent = dynamic(() => import("@/components/MapComponent"), {
@@ -13,7 +13,6 @@ const MapComponent = dynamic(() => import("@/components/MapComponent"), {
 function MapContent() {
   const { userLocation, emergencyLocation } = useStore();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const type = searchParams.get("type") || undefined;
   const mode = searchParams.get("mode") || undefined;
 

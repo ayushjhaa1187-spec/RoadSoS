@@ -6,7 +6,7 @@ import axios from "axios";
 import { POI, queryNearest } from "@/lib/offlineDb";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { Navigation as NavigationIcon, Phone, MapPin } from "lucide-react";
+import { Navigation as NavigationIcon, Phone } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 
@@ -25,7 +25,7 @@ export default function MapComponent({
   const router = useRouter();
   const [pois, setPois] = useState<POI[]>([]);
   const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
-  const [currentType, setCurrentType] = useState<string | undefined>(initialType);
+  const [currentType] = useState<string | undefined>(initialType);
 
   useEffect(() => {
     const fetchPOIs = async () => {
@@ -37,7 +37,7 @@ export default function MapComponent({
         } else {
           throw new Error("Offline");
         }
-      } catch (err) {
+      } catch {
         const cachedPois = await queryNearest(lat, lng, currentType, 10, 50);
         setPois(cachedPois);
         if (navigator.onLine) {
@@ -48,6 +48,7 @@ export default function MapComponent({
     fetchPOIs();
   }, [lat, lng, currentType]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onMapClick = (e: any) => {
     if (isReportingMode && e.detail.latLng) {
         const newLat = e.detail.latLng.lat;

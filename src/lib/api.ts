@@ -15,7 +15,7 @@ export async function withFallback<T>(apiFunc: () => Promise<T>, fallbackFunc: (
   }
 }
 
-export async function fetchNearest(lat: number, lng: number, type: string, radiusKm: number = 5, limit: int = 5): Promise<POI[]> {
+export async function fetchNearest(lat: number, lng: number, type: string, radiusKm: number = 5, limit: number = 5): Promise<POI[]> {
   return withFallback(
     async () => {
       const res = await axios.get(`${API_URL}/nearest`, {
@@ -30,7 +30,17 @@ export async function fetchNearest(lat: number, lng: number, type: string, radiu
   );
 }
 
-export async function triggerSOS(lat: number, lng: number, contacts: string[]): Promise<any> {
+export async function triggerSOS(
+  lat: number,
+  lng: number,
+  contacts: string[]
+): Promise<{
+  sms_body: string;
+  offline?: boolean;
+  nearest_hospital?: unknown;
+  nearest_police?: unknown;
+  nearest_ambulance?: unknown;
+}> {
   return withFallback(
     async () => {
       const res = await axios.post(`${API_URL}/sos`, { lat, lng, contacts }, { timeout: 4000 });

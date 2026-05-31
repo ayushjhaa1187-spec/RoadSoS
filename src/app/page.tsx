@@ -8,15 +8,15 @@ import { Hospital, ShieldAlert, Ambulance, Truck, Wrench, CarFront, Phone, MapPi
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
-import { queryLocalPOIs, cachePOIs } from "@/lib/db";
+import { queryLocalPOIs } from "@/lib/db";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const API_URL = "http://localhost:8000/api";
 
 export default function Home() {
-  const { userLocation, emergencyLocation, isDemoMode, isLocationManuallySet, setUserLocation, setLocationError, toggleDemoMode, resetEmergencyLocation } = useStore();
+  const { emergencyLocation, isDemoMode, isLocationManuallySet, setUserLocation, setLocationError, toggleDemoMode, resetEmergencyLocation } = useStore();
   const [loadingSOS, setLoadingSOS] = useState(false);
-  const [emergencyNums, setEmergencyNumbers] = useState<any>(null);
+  const [emergencyNums, setEmergencyNumbers] = useState<{ name: string; phone: string } | null>(null);
   const [address, setAddress] = useState<string>("Acquiring location...");
   const [showChecklist, setShowChecklist] = useState(false);
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function Home() {
     try {
       const res = await axios.get(`${API_URL}/emergency-numbers?country=India`);
       setEmergencyNumbers(res.data);
-    } catch (e) {
+    } catch {
       setEmergencyNumbers({ name: "National Emergency", phone: "112" });
     }
   };
@@ -40,7 +40,7 @@ export default function Home() {
         try {
           const res = await axios.get(`${API_URL}/locality?lat=${emergencyLocation.lat}&lng=${emergencyLocation.lng}`);
           setAddress(res.data.locality);
-        } catch (e) {
+        } catch {
           setAddress(`${emergencyLocation.lat.toFixed(4)}, ${emergencyLocation.lng.toFixed(4)}`);
         }
       }
@@ -85,7 +85,7 @@ export default function Home() {
       } else {
         throw new Error("Offline");
       }
-    } catch (error: any) {
+    } catch {
       const nearestHospitals = await queryLocalPOIs(emergencyLocation.lat, emergencyLocation.lng, "hospital", 20);
       const mapsLink = `https://www.google.com/maps?q=${emergencyLocation.lat},${emergencyLocation.lng}`;
       smsBody = nearestHospitals.length > 0 ? `Emergency! I need help at: ${mapsLink}. Nearest hospital: ${nearestHospitals[0].name}.` : `Emergency! I need help at: ${mapsLink}. Send ambulance.`;
@@ -154,14 +154,14 @@ export default function Home() {
                 </div>
                 <div className="flex gap-2 text-xs items-start">
                     <CheckSquare size={14} className="mt-0.5 text-green-500 shrink-0" />
-                    <span><b>Don't Move:</b> Unless there is a fire or explosion risk.</span>
+                    <span><b>Don&apos;t Move:</b> Unless there is a fire or explosion risk.</span>
                 </div>
                 <div className="flex gap-2 text-xs items-start">
                     <CheckSquare size={14} className="mt-0.5 text-green-500 shrink-0" />
                     <span><b>Keep Warm:</b> Cover victim with a coat/blanket.</span>
                 </div>
                 <Button className="w-full h-8 text-[10px] mt-2 bg-green-700 hover:bg-green-600" onClick={() => setShowChecklist(false)}>
-                    I'M HELPING - HIDE
+                    I&apos;M HELPING - HIDE
                 </Button>
             </CardContent>
         </Card>
@@ -206,14 +206,16 @@ export default function Home() {
         </Card>
         
         <Dialog>
-          <DialogTrigger asChild>
-            <Card className="bg-card/50 cursor-pointer active:bg-card col-span-3" role="button" onClick={fetchEmergencyNumbers}>
-              <CardContent className="p-3 flex items-center justify-center gap-4">
-                <Phone className="text-white" size={20} />
-                <span className="font-bold text-xs uppercase tracking-wider">National Emergency Numbers</span>
-              </CardContent>
-            </Card>
-          </DialogTrigger>
+          <DialogTrigger
+            render={
+              <Card className="bg-card/50 cursor-pointer active:bg-card col-span-3" role="button" onClick={fetchEmergencyNumbers}>
+                <CardContent className="p-3 flex items-center justify-center gap-4">
+                  <Phone className="text-white" size={20} />
+                  <span className="font-bold text-xs uppercase tracking-wider">National Emergency Numbers</span>
+                </CardContent>
+              </Card>
+            }
+          />
           <DialogContent className="bg-card border-border">
             <DialogHeader>
               <DialogTitle>Emergency Contacts</DialogTitle>

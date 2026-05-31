@@ -31,6 +31,7 @@ export default function OfflinePage() {
         }
     };
     initCache();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emergencyLocation.lat]);
 
   const handleDownloadRegion = async () => {
@@ -59,7 +60,7 @@ export default function OfflinePage() {
       localStorage.setItem('roadsos_precached', 'true');
       setCacheAge(0);
       toast.success(`Cached ${poisToCache.length} POIs for offline use.`);
-    } catch (err) {
+    } catch {
       toast.error("Failed to download offline data.");
     } finally {
       setIsDownloading(false);

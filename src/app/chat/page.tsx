@@ -24,16 +24,19 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [sessionId] = useState(() => Math.random().toString(36).substring(7));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = "en-US";
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setInput(transcript);
@@ -70,7 +73,7 @@ export default function ChatPage() {
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const audio = new Audio(url);
       audio.play();
-    } catch (e) {
+    } catch {
       toast.error("TTS failed.");
     }
   };
@@ -106,7 +109,7 @@ export default function ChatPage() {
       // Auto-play TTS for bot responses to help in emergencies
       playTTS(botMsg.text);
 
-    } catch (err) {
+    } catch {
       toast.error("Failed to connect to the assistant.");
       setMessages((prev) => [...prev, { id: (Date.now()+1).toString(), sender: "bot", text: "Network error. Please try calling emergency numbers directly."}]);
     } finally {
